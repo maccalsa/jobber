@@ -1,12 +1,17 @@
 # docker compose up -d redis mongodb mysql postgres rabbitmq elasticsearch kibana
-version: '3.9'
+
+# In the Host System: You need to set vm.max_map_count to at least 262144.
+# To make this change permanent, add the line vm.max_map_count=262144 to /etc/sysctl.conf.
+# This file may be located elsewhere on your system; refer to your operating system's
+# documentation if needed. After adding the line, run sudo sysctl -p to apply the changes.
+version: "3.9"
 services:
   redis:
     container_name: redis_container
     image: redis:alpine
     restart: always
     ports:
-      - '6379:6379'
+      - "6379:6379"
     command: redis-server --loglevel warning
     volumes:
       - ./docker-volumes/cache:/data
@@ -29,7 +34,7 @@ services:
       - MYSQL_ROOT_PASSWORD=api
       - MYSQL_PASSWORD=api
     ports:
-      - '3306:3306'
+      - "3306:3306"
     volumes:
       - ./docker-volumes/mysql:/var/lib/mysql
   postgres:
@@ -41,7 +46,7 @@ services:
       - POSTGRES_PASSWORD=api
       - POSTGRES_DB=jobber_reviews
     ports:
-      - '5432:5432'
+      - "5432:5432"
     volumes:
       - ./docker-volumes/postgres:/var/lib/postgresql
   rabbitmq:
@@ -53,27 +58,28 @@ services:
       - RABBITMQ_DEFAULT_PASS=jobberpass
     ports:
       # AMQP protocol port
-      - '5672:5672'
+      - "5672:5672"
       # Management UI
-      - '15672:15672'
+      - "15672:15672"
   elasticsearch:
     container_name: elasticsearch_container
+    # 8.10.4
     image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
     restart: always
     environment:
       ES_JAVA_OPTS: -Xmx1g -Xms1g
       bootstrap.memory_lock: "true"
       discovery.type: single-node
-      network.host: 0.0.0.0
-      transport.host: 127.0.0.1
-      http.host: 0.0.0.0
+      # network.host: 0.0.0.0
+      # transport.host: 127.0.0.1
+      # http.host: 0.0.0.0
       # I can fix ths later
       xpack.security.enabled: "false"
       xpack.security.authc.api_key.enabled: "true"
       xpack.monitoring.collection.enabled: "true"
       xpack.security.enrollment.enabled: "true"
-      xpack.security.authc.token.enabled: "true"
-      ELASTIC_PASSWORD: admin1234
+      # xpack.security.authc.token.enabled: "true"
+      # ELASTIC_PASSWORD: admin1234
     ports:
       - 9300:9300
       - 9200:9200
@@ -98,7 +104,7 @@ services:
       - elastic
     volumes:
       - ./kibana.yml/:/usr/share/kibana/config/kibana.yml:ro
-    depends_on: 
+    depends_on:
       - elasticsearch
 
 networks:
